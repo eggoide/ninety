@@ -1,0 +1,9 @@
+kontrola vsech titulu zda jsou nektere nad SMA200 a RSI(2) pod 10
+
+vyber nejnizsi RSI 
+
+nakup titulu s nejnizsim RSI a zapsani nakupu do souboru titul.csv
+
+kontrola jiz nakoupenych titulu, pokud cena klesa - dokoupit , pokud cena nad SMA5 , prodat.
+
+po prodeji smazat titul.csv
