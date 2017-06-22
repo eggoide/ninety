@@ -11,9 +11,15 @@ import warnings
 from pandas.tseries.offsets import BDay
 
 config_file = open("/home/vboxuser/ninety/config/sp100.csv", "r").readlines()
+output_dir = '/home/vboxuser/ninety/output/'
 initial_capital = 10000
 initial_capital_shares = 10
 RSI_threshold = 10
+max_number_of_positions = 2
+max_number_of_iterations = 4
+TWS_IP = '127.0.0.1'
+TWS_PORT = '4096'
+TWS_ID = '101'
 
 warnings.filterwarnings('ignore')
 
@@ -24,10 +30,10 @@ def removeFile(removeFileName):
         pass
   
 def firstBuy(tick1):
-    if os.path.isfile("/home/vboxuser/ninety/output/%s.csv" % tick1) is True:
-        secondBuy(tick1)
+    if os.path.isfile("%s%s.csv" % (output_dir, tick1)) is True:
+        reBuy(tick1)
     else:
-        firstBuyFile = open("/home/vboxuser/ninety/output/%s.csv" % tick1, "w") 
+        firstBuyFile = open("%s%s.csv" % (output_dir, tick1), "w") 
         firstBuyCapital = initial_capital / 10
         firstBuySharesCount = firstBuyCapital / minRSIlastDayClose
         firstBuySharesValue = minRSIlastDayClose * round(firstBuySharesCount, 0)
@@ -35,10 +41,13 @@ def firstBuy(tick1):
         print >>firstBuyFile, "%s;%s;%s;%s;%s;%s" % (tick1, today, last_close_date, minRSIlastDayClose, lastDayRsi, firstBuyCapital)
         firstBuyFile.close()
     
-def secondBuy(tick1):
+def reBuy(tick1):
     #secondBuyCapital = (initial_capital / 10) * 2
-    print "SECOND BUY %s" % tick1
-    
+    print "REBUY %s" % tick1
+
+def sell(tick1):
+    pass
+    removeFile("%s%s.csv" % (output_dir, tick1))
     
 #removeFileName('/home/vboxuser/test/data/tmp/out.csv')
 
@@ -103,7 +112,7 @@ for ticker in config_file:
     # if lastDayClose > lastDaySma5:
         # print "Cena nad SMA5"
     #print " "
-  
+
 # filteredTickersFile.close()        
 
 #filteredListRaw = open("/home/vboxuser/test/data/tmp/out.csv", "r")
@@ -114,16 +123,22 @@ for ticker in config_file:
 #filteredListRaw.close()
 
 #print "filtered list: %s" % filteredList
+filesCounter = next(os.walk('%s' % output_dir))[2]
+filesNumber = len(filesCounter) 
+
 if not filteredList:
     print "No ticker meets criteria of RSI(2) below 10" % RSI_threshold
 else:
-    print ""
-    minRSIticker = min(filteredList, key=lambda x:x['key4'])['key3']
-    minRSI = min(filteredList, key=lambda x:x['key4'])['key4']
-    minRSIlastDayClose = min(filteredList, key=lambda x:x['key4'])['key2']
-    print "Winning ticker: %s, RSI: %s, PRICE: %s " % (minRSIticker, minRSI, minRSIlastDayClose)
-    #FIRST BUY
-    firstBuy(minRSIticker)
+    if filesNumber < max_number_of_positions:
+        print ""
+        minRSIticker = min(filteredList, key=lambda x:x['key4'])['key3']
+        minRSI = min(filteredList, key=lambda x:x['key4'])['key4']
+        minRSIlastDayClose = min(filteredList, key=lambda x:x['key4'])['key2']
+        print "Winning ticker: %s, RSI: %s, PRICE: %s " % (minRSIticker, minRSI, minRSIlastDayClose)
+        #FIRST BUY
+        firstBuy(minRSIticker)
+    else:
+        print "All available positions are already opened"
 
 # for filteredTicker in filteredList:
     # tickers = filteredTicker.split(';')
